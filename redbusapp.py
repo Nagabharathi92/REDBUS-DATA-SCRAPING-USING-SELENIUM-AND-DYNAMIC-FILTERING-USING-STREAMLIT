@@ -1,574 +1,539 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "ca718416-084c-41ce-8061-c804ea21c543",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "# importing libraries\n",
-    "import pandas as pd\n",
-    "import mysql.connector\n",
-    "import streamlit as slt\n",
-    "from streamlit_option_menu import option_menu\n",
-    "import plotly.express as px\n",
-    "import time\n",
-    "\n",
-    "# kerala bus\n",
-    "lists_k=[]\n",
-    "df_k=pd.read_csv(\"kerala_bus_details.csv\")\n",
-    "for i,r in df_k.iterrows():\n",
-    "    lists_k.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#Andhra bus\n",
-    "lists_A=[]\n",
-    "df_A=pd.read_csv(\"ap_bus_details.csv\")\n",
-    "for i,r in df_A.iterrows():\n",
-    "    lists_A.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#Telungana bus\n",
-    "lists_T=[]\n",
-    "df_T=pd.read_csv(\"telegana_bus_details.csv\")\n",
-    "for i,r in df_T.iterrows():\n",
-    "    lists_T.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#kadamba bus\n",
-    "lists_G=[]\n",
-    "df_G=pd.read_csv(\"kadamba_bus_details.csv\")\n",
-    "for i,r in df_G.iterrows():\n",
-    "    lists_G.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#Rajastan bus\n",
-    "lists_R=[]\n",
-    "df_R=pd.read_csv(\"rajasthan_bus_details.csv\")\n",
-    "for i,r in df_R.iterrows():\n",
-    "    lists_R.append(r[\"Route_Name\"])\n",
-    "\n",
-    "\n",
-    "# chandigarh\n",
-    "lists_C=[]\n",
-    "df_C=pd.read_csv(\"chandigarh_bus_details.csv\")\n",
-    "for i,r in df_C.iterrows():\n",
-    "    lists_C.append(r[\"Route_Name\"])\n",
-    "\n",
-    "# Himachal bus\n",
-    "lists_H=[]\n",
-    "df_H=pd.read_csv(\"himachal_bus_details.csv\")\n",
-    "for i,r in df_H.iterrows():\n",
-    "    lists_H.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#Assam bus\n",
-    "lists_AS=[]\n",
-    "df_AS=pd.read_csv(\"assam_bus_details.csv\")\n",
-    "for i,r in df_AS.iterrows():\n",
-    "    lists_AS.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#jammu bus\n",
-    "lists_J=[]\n",
-    "df_J=pd.read_csv(\"jk_bus_details.csv\")\n",
-    "for i,r in df_J.iterrows():\n",
-    "    lists_J.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#West bengal bus\n",
-    "lists_WB=[]\n",
-    "df_WB=pd.read_csv(\"wb_bus_details.csv\")\n",
-    "for i,r in df_WB.iterrows():\n",
-    "    lists_WB.append(r[\"Route_Name\"])\n",
-    "\n",
-    "#setting up streamlit page\n",
-    "slt.set_page_config(layout=\"wide\")\n",
-    "\n",
-    "web=option_menu(menu_title=\"🚌OnlineBus\",\n",
-    "                options=[\"Home\",\"📍States and Routes\"],\n",
-    "                icons=[\"house\",\"info-circle\"],\n",
-    "                orientation=\"horizontal\"\n",
-    "                )\n",
-    "# Home page setting\n",
-    "if web==\"Home\":\n",
-    "    slt.title(\"Redbus Data Scraping with Selenium & Dynamic Filtering using Streamlit\")\n",
-    "    slt.subheader(\":blue[Domain:]  Transportation\")\n",
-    "    slt.subheader(\":blue[Ojective:] \")\n",
-    "    slt.markdown(\"The 'Redbus Data Scraping and Filtering with Streamlit Application' aims to revolutionize the transportation industry by providing a comprehensive solution for collecting, analyzing, and visualizing bus travel data. By utilizing Selenium for web scraping, this project automates the extraction of detailed information from Redbus, including bus routes, schedules, prices, and seat availability. By streamlining data collection and providing powerful tools for data-driven decision-making, this project can significantly improve operational efficiency and strategic planning in the transportation industry.\")\n",
-    "    slt.subheader(\":blue[Overview:]\") \n",
-    "    slt.markdown(\"Selenium: Selenium is a tool used for automating web browsers. It is commonly used for web scraping, which involves extracting data from websites. Selenium allows you to simulate human interactions with a web page, such as clicking buttons, filling out forms, and navigating through pages, to collect the desired data...\")\n",
-    "    slt.markdown('''Pandas: Use the powerful Pandas library to transform the dataset from CSV format into a structured dataframe.\n",
-    "                    Pandas helps data manipulation, cleaning, and preprocessing, ensuring that data was ready for analysis.''')\n",
-    "    slt.markdown('''MySQL: With help of SQL to establish a connection to a SQL database, enabling seamless integration of the transformed dataset\n",
-    "                    and the data was efficiently inserted into relevant tables for storage and retrieval.''')\n",
-    "    slt.markdown(\"Streamlit: Developed an interactive web application using Streamlit, a user-friendly framework for data visualization and analysis.\")\n",
-    "    slt.subheader(\":blue[Skill-take:]\")\n",
-    "    slt.markdown(\"Selenium, Python, Pandas, MySQL,mysql-connector-python, Streamlit.\")\n",
-    "    slt.subheader(\":blue[Developed-by:] nagabharathi\")\n",
-    "\n",
-    "# States and Routes page setting\n",
-    "if web == \"📍States and Routes\":\n",
-    "    S = slt.selectbox(\"Lists of States\", [\"Kerala\", \"Andhra Pradesh\", \"Telegana\", \"kadamba\", \"Rajastan\", \n",
-    "                                          \"Chandigarh\", \"Himachal\", \"Assam\", \"Jammu\", \"West Bengal\"])\n",
-    "    \n",
-    "    col1,col2=slt.columns(2)\n",
-    "    with col1:\n",
-    "        select_type = slt.radio(\"Choose bus type\", (\"sleeper\", \"semi-sleeper\", \"others\"))\n",
-    "    with col2:\n",
-    "        select_fare = slt.radio(\"Choose bus fare range\", (\"50-1000\", \"1000-2000\", \"2000 and above\"))\n",
-    "    TIME=slt.time_input(\"select the time\")\n",
-    "\n",
-    "    # Kerala bus fare filtering\n",
-    "    if S == \"Kerala\":\n",
-    "        K = slt.selectbox(\"List of routes\",lists_k)\n",
-    "\n",
-    "        def type_and_fare(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  # assuming a high max value for \"2000 and above\"\n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{K}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "\n",
-    "    # Andhra Pradesh bus fare filtering\n",
-    "    if S==\"Andhra Pradesh\":\n",
-    "        A=slt.selectbox(\"list of routes\",lists_A)\n",
-    "\n",
-    "        def type_and_fare_A(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{A}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_A(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "          \n",
-    "\n",
-    "    # Telugana bus fare filtering\n",
-    "    if S==\"Telugana\":\n",
-    "        T=slt.selectbox(\"list of routes\",lists_T)\n",
-    "\n",
-    "        def type_and_fare_T(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{T}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_T(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "\n",
-    "    # kadamba bus fare filtering\n",
-    "    if S==\"kadamba\":\n",
-    "        G=slt.selectbox(\"list of routes\",lists_G)\n",
-    "\n",
-    "        def type_and_fare_G(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_name = \"{G}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_G(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "\n",
-    "    # Rajastan bus fare filtering\n",
-    "    if S==\"Rajastan\":\n",
-    "        R=slt.selectbox(\"list of routes\",lists_R)\n",
-    "\n",
-    "        def type_and_fare_R(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{R}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_R(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "          \n",
-    "\n",
-    "    # chandigarh bus fare filtering       \n",
-    "    if S==\"Chandigarh\":\n",
-    "        C=slt.selectbox(\"list of routes\",lists_C)\n",
-    "\n",
-    "        def type_and_fare_C(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{C}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_C(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "    \n",
-    "    # Himachal bus fare filtering\n",
-    "    if S==\"Himachal\":\n",
-    "        H=slt.selectbox(\"list of rotes\",lists_H)\n",
-    "\n",
-    "        def type_and_fare_H(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{H}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_H(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "\n",
-    "\n",
-    "    # Assam bus fare filtering\n",
-    "    if S==\"Assam\":\n",
-    "        AS=slt.selectbox(\"list of rotes\",lists_AS)\n",
-    "\n",
-    "        def type_and_fare_AS(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{AS}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_AS(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "\n",
-    "    # jammu bus fare filtering\n",
-    "    if S==\"jammu\":\n",
-    "        J=slt.selectbox(\"list of rotes\",lists_J)\n",
-    "\n",
-    "        def type_and_fare_UP(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{J}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_J(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "\n",
-    "    # West Bengal bus fare filtering\n",
-    "    if S==\"West Bengal\":\n",
-    "        WB=slt.selectbox(\"list of rotes\",lists_WB)\n",
-    "\n",
-    "        def type_and_fare_WB(bus_type, fare_range):\n",
-    "            conn = mysql.connector.connect(host=\"localhost\", user=\"root\", password=\"naga\", database=\"RED_BUS_DETAILS\")\n",
-    "            my_cursor = conn.cursor()\n",
-    "            # Define fare range based on selection\n",
-    "            if fare_range == \"50-1000\":\n",
-    "                fare_min, fare_max = 50, 1000\n",
-    "            elif fare_range == \"1000-2000\":\n",
-    "                fare_min, fare_max = 1000, 2000\n",
-    "            else:\n",
-    "                fare_min, fare_max = 2000, 100000  \n",
-    "\n",
-    "            # Define bus type condition\n",
-    "            if bus_type == \"sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%Sleeper%'\"\n",
-    "            elif bus_type == \"semi-sleeper\":\n",
-    "                bus_type_condition = \"Bus_Type LIKE '%A/c Semi Sleeper %'\"\n",
-    "            else:\n",
-    "                bus_type_condition = \"Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'\"\n",
-    "\n",
-    "            query = f'''\n",
-    "                SELECT * FROM busdetails \n",
-    "                WHERE Price BETWEEN {fare_min} AND {fare_max}\n",
-    "                AND Route_Name = \"{WB}\"\n",
-    "                AND {bus_type_condition} AND Departing_Time>='{TIME}'\n",
-    "                ORDER BY Price and Departing_Time  DESC\n",
-    "            '''\n",
-    "            my_cursor.execute(query)\n",
-    "            out = my_cursor.fetchall()\n",
-    "            conn.close()\n",
-    "\n",
-    "            df = pd.DataFrame(out, columns=[\n",
-    "                \"ID\", \"Route_Name\",\"Route_Link\",\"Bus_Name\", \"Bus_Type\", \"Departing_Time\", \"Duration\", \"Reaching_Time\",\n",
-    "                \"Star_Rating\",\"Price\",\"Seat_Availability\"\n",
-    "            ])\n",
-    "            return df\n",
-    "\n",
-    "        df_result = type_and_fare_WB(select_type, select_fare)\n",
-    "        slt.dataframe(df_result)\n",
-    "\n",
-    "#The output of the page is:http://localhost:8503/\n"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.12.4"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+import pandas as pd
+import mysql.connector
+import streamlit as slt
+from streamlit_option_menu import option_menu
+import plotly.express as px
+import time
+
+# kerala bus
+lists_K=[]
+df_K=pd.read_csv("kerala_bus_details.csv")
+for i,r in df_K.iterrows():
+    lists_K.append(r["Route_Name"])
+
+#Andhra bus
+lists_A=[]
+df_A=pd.read_csv("ap_bus_details.csv")
+for i,r in df_A.iterrows():
+    lists_A.append(r["Route_Name"])
+
+#Telungana bus
+lists_T=[]
+df_T=pd.read_csv("telegana_bus_details.csv")
+for i,r in df_T.iterrows():
+    lists_T.append(r["Route_Name"])
+
+#kadamba bus
+lists_G=[]
+df_G=pd.read_csv("kadamba_bus_details.csv")
+for i,r in df_G.iterrows():
+    lists_G.append(r["Route_Name"])
+
+#Rajastan bus
+lists_R=[]
+df_R=pd.read_csv("rajasthan_bus_details.csv")
+for i,r in df_R.iterrows():
+    lists_R.append(r["Route_Name"])
+
+
+# chandigarh
+lists_C=[]
+df_C=pd.read_csv("chandigarh_bus_details.csv")
+for i,r in df_C.iterrows():
+    lists_C.append(r["Route_Name"])
+
+# Himachal bus
+lists_H=[]
+df_H=pd.read_csv("himachal_bus_details.csv")
+for i,r in df_H.iterrows():
+    lists_H.append(r["Route_Name"])
+
+#Assam bus
+lists_AS=[]
+df_AS=pd.read_csv("assam_bus_details.csv")
+for i,r in df_AS.iterrows():
+    lists_AS.append(r["Route_Name"])
+
+#jammu bus
+lists_J=[]
+df_J=pd.read_csv("jk_bus_details.csv")
+for i,r in df_J.iterrows():
+    lists_J.append(r["Route_Name"])
+
+#West bengal bus
+lists_WB=[]
+df_WB=pd.read_csv("wb_bus_details.csv")
+for i,r in df_WB.iterrows():
+    lists_WB.append(r["Route_Name"])
+
+#setting up streamlit page
+slt.set_page_config(layout="wide")
+
+web=option_menu(menu_title="🚌OnlineBus",
+                options=["Home","📍States and Routes"],
+                icons=["house","info-circle"],
+                orientation="horizontal"
+                )
+# Home page setting
+if web=="Home":
+    slt.title("Redbus Data Scraping with Selenium & Dynamic Filtering using Streamlit")
+    slt.subheader(":blue[Domain:]  Transportation")
+    slt.subheader(":blue[Objective:] ")
+    slt.markdown("The 'Redbus Data Scraping and Filtering with Streamlit Application' aims to revolutionize the transportation industry by providing a comprehensive solution for collecting, analyzing, and visualizing bus travel data. By utilizing Selenium for web scraping, this project automates the extraction of detailed information from Redbus, including bus routes, schedules, prices, and seat availability. By streamlining data collection and providing powerful tools for data-driven decision-making, this project can significantly improve operational efficiency and strategic planning in the transportation industry.")
+    slt.subheader(":blue[Overview:]") 
+    slt.markdown("Selenium: Selenium is a tool used for automating web browsers. It is commonly used for web scraping, which involves extracting data from websites. Selenium allows you to simulate human interactions with a web page, such as clicking buttons, filling out forms, and navigating through pages, to collect the desired data...")
+    slt.markdown('''Pandas: Use the powerful Pandas library to transform the dataset from CSV format into a structured dataframe.
+                    Pandas helps data manipulation, cleaning, and preprocessing, ensuring that data was ready for analysis.''')
+    slt.markdown('''MySQL: With help of SQL to establish a connection to a SQL database, enabling seamless integration of the transformed dataset
+                    and the data was efficiently inserted into relevant tables for storage and retrieval.''')
+    slt.markdown("Streamlit: Developed an interactive web application using Streamlit, a user-friendly framework for data visualization and analysis.")
+    slt.subheader(":blue[Skill-take:]")
+    slt.markdown("Selenium, Python, Pandas, MySQL,mysql-connector-python, Streamlit.")
+    slt.subheader(":blue[Developed-by:] nagabharathi")
+
+# States and Routes page setting
+if web == "📍States and Routes":
+    S = slt.selectbox("Lists of States", ["Kerala", "Andhra Pradesh", "Telegana", "kadamba", "Rajastan", 
+                                          "Chandigarh", "Himachal", "Assam", "Jammu", "West Bengal"])
+    
+    col1,col2=slt.columns(2)
+    with col1:
+        select_type = slt.radio("Choose Bus_Type", ("sleeper", "semi-sleeper", "others"))
+    with col2:
+        select_Price = slt.radio("Choose Price range", ("50-1000", "1000-2000", "2000 and above"))
+    TIME=slt.time_input("select the time")
+
+    # Kerala bus fare filtering
+    if S == "Kerala":
+        K = slt.selectbox("List of routes",lists_K)
+
+        def type_and_Price_K(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  # assuming a high max value for "2000 and above"
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{K}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_K(select_type, select_Price)
+        slt.dataframe(df_result)
+
+    # Andhra Pradesh bus fare filtering
+    if S=="Andhra Pradesh":
+        A=slt.selectbox("list of routes",lists_A)
+
+        def type_and_Price_A(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{A}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_A(select_type, select_Price)
+        slt.dataframe(df_result)
+          
+
+    # Telugana bus fare filtering
+    if S=="Telegana":
+        T=slt.selectbox("list of routes",lists_T)
+
+        def type_and_Price_T(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{T}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_T(select_type, select_Price)
+        slt.dataframe(df_result)
+
+    # kadamba bus fare filtering
+    if S=="kadamba":
+        G=slt.selectbox("list of routes",lists_G)
+
+        def type_and_Price_G(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{G}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_G(select_type, select_Price)
+        slt.dataframe(df_result)
+
+    # Rajastan bus fare filtering
+    if S=="Rajastan":
+        R=slt.selectbox("list of routes",lists_R)
+
+        def type_and_Price_R(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{R}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_R(select_type, select_Price)
+        slt.dataframe(df_result)
+          
+
+    # chandigarh bus fare filtering       
+    if S=="Chandigarh":
+        C=slt.selectbox("list of routes",lists_C)
+
+        def type_and_Price_C(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{C}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_C(select_type, select_Price)
+        slt.dataframe(df_result)
+    
+    # Himachal bus fare filtering
+    if S=="Himachal":
+        H=slt.selectbox("list of routes",lists_H)
+
+        def type_and_Price_H(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{H}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_H(select_type, select_Price)
+        slt.dataframe(df_result)
+
+
+    # Assam bus fare filtering
+    if S=="Assam":
+        AS=slt.selectbox("list of routes",lists_AS)
+
+        def type_and_Price_AS(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{AS}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_AS(select_type, select_Price)
+        slt.dataframe(df_result)
+
+    # jammu bus fare filtering
+    if S=="Jammu":
+        J=slt.selectbox("list of routes",lists_J)
+
+        def type_and_Price_J(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{J}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_J(select_type, select_Price)
+        slt.dataframe(df_result)
+
+    # West Bengal bus fare filtering
+    if S=="West Bengal":
+        WB=slt.selectbox("list of routes",lists_WB)
+
+        def type_and_Price_WB(Bus_Type, Price_range):
+            conn = mysql.connector.connect(host="localhost", user="root", password="naga", database="RED_BUS_DETAILS")
+            my_cursor = conn.cursor()
+            # Define fare range based on selection
+            if Price_range == "50-1000":
+                Price_min, Price_max = 50, 1000
+            elif Price_range == "1000-2000":
+                Price_min, Price_max = 1000, 2000
+            else:
+                Price_min, Price_max = 2000, 100000  
+
+            # Define bus type condition
+            if Bus_Type == "sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%Sleeper%'"
+            elif Bus_Type == "semi-sleeper":
+                Bus_Type_condition = "Bus_Type LIKE '%A/c Semi Sleeper %'"
+            else:
+                Bus_Type_condition = "Bus_Type NOT LIKE '%Sleeper%' AND Bus_Type NOT LIKE '%Semi-Sleeper%'"
+
+            query = f'''
+                SELECT * FROM busdetails 
+                WHERE Price BETWEEN {Price_min} AND {Price_max}
+                AND Route_Name = "{WB}"
+                AND {Bus_Type_condition} AND Departing_Time>='{TIME}'
+                ORDER BY Price and Departing_Time  DESC
+            '''
+            my_cursor.execute(query)
+            out = my_cursor.fetchall()
+            conn.close()
+
+            df = pd.DataFrame(out, columns=[
+                "ID", "Route_Name","Route_Link","Bus_Name", "Bus_Type", "Departing_Time", "Duration", "Reaching_Time",
+                "Star_Rating","Price","Seat_Availability"
+            ])
+            return df
+
+        df_result = type_and_Price_WB(select_type, select_Price)
+        slt.dataframe(df_result)
+
+
