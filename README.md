@@ -25,6 +25,7 @@ web app - streamlit:
 With the help of Streamlit, you can create an interactive application similar to RedBus by designing a user-friendly interface that allows users to search for bus routes, view available buses, and get details like departure times and prices
 
 PACKAGES AND LIBRARIES
+
 •	import pandas as pd
 
 •	mysql.connector
